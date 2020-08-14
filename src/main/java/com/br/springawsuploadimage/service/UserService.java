@@ -44,6 +44,7 @@ public class UserService {
         try {
             fileService.save(path, filename, Optional.of(metadata), file.getInputStream());
             user.setImageLink(filename);
+            userRepository.save(user);
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }
@@ -57,7 +58,10 @@ public class UserService {
                 Bucket.UPLOAD_IMAGE.getName(),
                 user.getId());
 
-        return user.getImageLink().getBytes();
+        //envia o caminho e o link da imagem
+        return user.getImageLink()
+                .map(key -> fileService.download(path, key))
+                .orElse( new byte[0]);
 
     }
 
